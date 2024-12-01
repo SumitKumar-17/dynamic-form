@@ -5,13 +5,13 @@ import { fetchFormStructure } from "@/app/utils/api";
 import { FormField as FieldType, FormStructure } from "@/app/types/form";
 
 interface SubmittedData {
-  [key: string]: any;
+  [key: string]: string|number;
 }
 
 const DynamicForm: React.FC = () => {
   const [formType, setFormType] = useState<string>("User Information");
   const [fields, setFields] = useState<FieldType[]>([]);
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formData, setFormData] = useState<Record<string, string|number>>({});
   const [submittedData, setSubmittedData] = useState<{
     [key: string]: SubmittedData[];
   }>({
@@ -36,7 +36,7 @@ const DynamicForm: React.FC = () => {
     setProgress((filledFields.length / requiredFields.length) * 100 || 0);
   }, [fields, formData]);
 
-  const handleFieldChange = (name: string, value: any) => {
+  const handleFieldChange = (name: string, value: string|number) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 

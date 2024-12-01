@@ -3,8 +3,8 @@ import { FormField as FieldType } from "@/app/types/form";
 
 interface FormFieldProps {
   field: FieldType;
-  value: any;
-  onChange: (name: string, value: any) => void;
+  value: string|number|readonly string[];
+  onChange: (name: string, value: string|number|readonly string[]) => void;
   onFileUpload?: (name: string, file: File) => void;
 }
 
