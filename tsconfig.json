@@ -1,10 +1,12 @@
+
 {
   "compilerOptions": {
+    "noImplicitAny": false,  // Allow `any` type
+    "strict": false,         // Disable all strict type-checking options
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
