@@ -1,17 +1,30 @@
 import React from "react";
-import { FormField as FieldType } from "@/types/form";
+import { FormField as FieldType } from "@/app/types/form";
 
 interface FormFieldProps {
   field: FieldType;
   value: any;
   onChange: (name: string, value: any) => void;
+  onFileUpload?: (name: string, file: File) => void;
 }
 
-const FormField: React.FC<FormFieldProps> = ({ field, value, onChange }) => {
+const FormField: React.FC<FormFieldProps> = ({
+  field,
+  value,
+  onChange,
+  onFileUpload,
+}) => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     onChange(field.name, e.target.value);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onFileUpload) {
+      onFileUpload(field.name, file);
+    }
   };
 
   return (
@@ -29,6 +42,12 @@ const FormField: React.FC<FormFieldProps> = ({ field, value, onChange }) => {
             </option>
           ))}
         </select>
+      ) : field.type === "file" ? (
+        <input
+          type="file"
+          onChange={handleFileChange}
+          className="p-2 border rounded-md w-full"
+        />
       ) : (
         <input
           type={field.type}

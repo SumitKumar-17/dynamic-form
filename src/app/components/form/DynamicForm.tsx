@@ -2,18 +2,25 @@ import React, { useState, useEffect } from "react";
 import FormField from "./FormField";
 import ProgressBar from "./ProgressBar";
 import { fetchFormStructure } from "@/app/utils/api";
-import { FormField as FieldType, FormStructure } from "@/app/types/form";
+import { FormField as FieldType, FormStructure } from "@/types/form";
+
+interface SubmittedData {
+  [key: string]: any;
+}
 
 const DynamicForm: React.FC = () => {
   const [formType, setFormType] = useState<string>("User Information");
   const [fields, setFields] = useState<FieldType[]>([]);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [submittedData, setSubmittedData] = useState<SubmittedData[]>([]);
   const [progress, setProgress] = useState<number>(0);
+  const [feedback, setFeedback] = useState<string>("");
 
   useEffect(() => {
     fetchFormStructure(formType).then((response: FormStructure) => {
       setFields(response.fields);
       setFormData({});
+      setFeedback("");
     });
   }, [formType]);
 
@@ -29,8 +36,25 @@ const DynamicForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Submitted:", formData);
-    alert("Sign-up Successful");
+    setSubmittedData((prev) => [...prev, formData]);
+    setFormData({});
+    setFeedback("Sign-up Successful!");
+  };
+
+  const handleDelete = (index: number) => {
+    setSubmittedData((prev) => prev.filter((_, i) => i !== index));
+    setFeedback("Entry deleted successfully.");
+  };
+
+  const handleEdit = (index: number) => {
+    setFormData(submittedData[index]);
+    setSubmittedData((prev) => prev.filter((_, i) => i !== index));
+    setFeedback("Edit mode activated. Make changes and resubmit.");
+  };
+
+  const handleFileUpload = (name: string, file: File) => {
+    setFormData((prev) => ({ ...prev, [name]: file.name }));
+    setFeedback("File uploaded successfully!");
   };
 
   return (
@@ -48,6 +72,12 @@ const DynamicForm: React.FC = () => {
         </select>
       </header>
 
+      {feedback && (
+        <div className="my-4 p-2 bg-green-100 text-green-700 rounded-md">
+          {feedback}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4 mt-6">
         {fields.map((field) => (
           <FormField
@@ -55,6 +85,7 @@ const DynamicForm: React.FC = () => {
             field={field}
             value={formData[field.name] || ""}
             onChange={handleFieldChange}
+            onFileUpload={handleFileUpload}
           />
         ))}
         <ProgressBar progress={progress} />
@@ -66,6 +97,49 @@ const DynamicForm: React.FC = () => {
           Submit
         </button>
       </form>
+
+      {submittedData.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-4">Submitted Data</h2>
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-200">
+                {Object.keys(submittedData[0]).map((key) => (
+                  <th key={key} className="border border-gray-300 p-2">
+                    {key}
+                  </th>
+                ))}
+                <th className="border border-gray-300 p-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {submittedData.map((data, index) => (
+                <tr key={index}>
+                  {Object.values(data).map((value, idx) => (
+                    <td key={idx} className="border border-gray-300 p-2">
+                      {value}
+                    </td>
+                  ))}
+                  <td className="border border-gray-300 p-2">
+                    <button
+                      onClick={() => handleEdit(index)}
+                      className="text-blue-500 mr-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(index)}
+                      className="text-red-500"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
